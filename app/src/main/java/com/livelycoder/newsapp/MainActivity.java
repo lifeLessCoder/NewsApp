@@ -6,14 +6,16 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,7 +31,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>>, SwipeRefreshLayout.OnRefreshListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     @BindView(R.id.news_recycler_view)
     RecyclerView mRecyclerView;
@@ -37,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     TextView mEmptyView;
     @BindView(R.id.progress_bar)
     View mProgressBar;
+    @BindView(R.id.swipe_container)
+    SwipeRefreshLayout swipeRefreshLayout;
     private NewsAdapter mAdapter;
     private final String API_URL = "https://content.guardianapis.com/search";
     private static final int NEWS_LOADER_ID = 1;
@@ -64,6 +68,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 mEmptyView.setText(R.string.no_internet);
             }
         }
+
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.colorAccent,
+                android.R.color.holo_green_dark,
+                android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark
+        );
     }
 
     @NonNull
@@ -91,15 +103,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<List<News>> loader, List<News> news) {
-        Log.d(LOG_TAG, "onLoadFinished");
-        mProgressBar.setVisibility(View.GONE);
-        if (news != null && !news.isEmpty()) {
-            mEmptyView.setText("");
-            mAdapter.clear();
-            mAdapter.addAll(news);
-        } else
-            mEmptyView.setText(R.string.no_news);
+    public void onLoadFinished(@NonNull Loader<List<News>> loader, final List<News> news) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(LOG_TAG, "onLoadFinished");
+                mProgressBar.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
+                if (news != null && !news.isEmpty()) {
+                    mEmptyView.setText("");
+                    mAdapter.clear();
+                    mAdapter.addAll(news);
+                } else
+                    mEmptyView.setText(R.string.no_news);
+            }
+        }, 5000);
     }
 
     @Override
@@ -117,11 +135,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh:
-                mAdapter.clear();
-                mProgressBar.setVisibility(View.VISIBLE);
-                getSupportLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
-                return true;
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
@@ -140,5 +153,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRefresh() {
+        mAdapter.clear();
+        getSupportLoaderManager()
+                .restartLoader(NEWS_LOADER_ID, null, this);
     }
 }
