@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,20 +27,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>>, SwipeRefreshLayout.OnRefreshListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    @BindView(R.id.news_recycler_view)
-    RecyclerView mRecyclerView;
-    @BindView(R.id.empty_view)
-    TextView mEmptyView;
-    @BindView(R.id.progress_bar)
-    View mProgressBar;
-    @BindView(R.id.swipe_container)
-    SwipeRefreshLayout swipeRefreshLayout;
-    private NewsAdapter mAdapter;
+    private RecyclerView recyclerView;
+    private TextView emptyView;
+    private View progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private NewsAdapter adapter;
     private final String API_URL = "https://content.guardianapis.com/search";
     private static final int NEWS_LOADER_ID = 1;
 
@@ -49,13 +41,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this,
+        findAllViews();
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false));
-        mAdapter = new NewsAdapter(new ArrayList<News>());
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this,
+        adapter = new NewsAdapter(new ArrayList<News>());
+        recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         if (cm != null) {
@@ -64,8 +56,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 Log.d(LOG_TAG, "initLoader");
                 getSupportLoaderManager().initLoader(NEWS_LOADER_ID, null, this);
             } else {
-                mProgressBar.setVisibility(View.GONE);
-                mEmptyView.setText(R.string.no_internet);
+                progressBar.setVisibility(View.GONE);
+                emptyView.setText(R.string.no_internet);
             }
         }
 
@@ -76,6 +68,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_blue_dark
         );
+    }
+
+    /**
+     * Finds all the views by id
+     */
+    private void findAllViews() {
+        recyclerView = findViewById(R.id.news_recycler_view);
+        emptyView = findViewById(R.id.empty_view);
+        progressBar = findViewById(R.id.progress_bar);
+        swipeRefreshLayout = findViewById(R.id.swipe_container);
     }
 
     @NonNull
@@ -104,26 +106,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(@NonNull Loader<List<News>> loader, final List<News> news) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(LOG_TAG, "onLoadFinished");
-                mProgressBar.setVisibility(View.GONE);
-                swipeRefreshLayout.setRefreshing(false);
-                if (news != null && !news.isEmpty()) {
-                    mEmptyView.setText("");
-                    mAdapter.clear();
-                    mAdapter.addAll(news);
-                } else
-                    mEmptyView.setText(R.string.no_news);
-            }
-        }, 5000);
+        Log.d(LOG_TAG, "onLoadFinished");
+        progressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
+        if (news != null && !news.isEmpty()) {
+            emptyView.setText("");
+            adapter.clear();
+            adapter.addAll(news);
+        } else
+            emptyView.setText(R.string.no_news);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<List<News>> loader) {
         Log.d(LOG_TAG, "onLoaderReset");
-        mAdapter.clear();
+        adapter.clear();
     }
 
     @Override
@@ -157,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onRefresh() {
-        mAdapter.clear();
+        adapter.clear();
         getSupportLoaderManager()
                 .restartLoader(NEWS_LOADER_ID, null, this);
     }

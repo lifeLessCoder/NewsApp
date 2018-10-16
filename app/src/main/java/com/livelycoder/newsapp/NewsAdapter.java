@@ -12,9 +12,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     private List<News> mNews;
 
@@ -51,25 +48,24 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.title_text_view)
-        TextView mTitleTextView;
-        @BindView(R.id.author_name_text_view)
-        TextView mAuthorNameTextView;
-        @BindView(R.id.date_published_text_view)
-        TextView mDatePublishedTextView;
-        @BindView(R.id.section_name_text_view)
-        TextView mSectionNameTextView;
+        TextView titleTextView;
+        TextView authorNameTextView;
+        TextView datePublishedTextView;
+        TextView sectionNameTextView;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            titleTextView = itemView.findViewById(R.id.title_text_view);
+            authorNameTextView = itemView.findViewById(R.id.author_name_text_view);
+            datePublishedTextView = itemView.findViewById(R.id.date_published_text_view);
+            sectionNameTextView = itemView.findViewById(R.id.section_name_text_view);
         }
 
         void onBind(final News news) {
-            mTitleTextView.setText(news.getTitle());
-            mSectionNameTextView.setText(news.getSectionName());
-            mAuthorNameTextView.setText(news.getAuthorName());
-            mDatePublishedTextView.setText(news.getPublishedDate().substring(0, 10));
+            titleTextView.setText(news.getTitle());
+            sectionNameTextView.setText(news.getSectionName());
+            authorNameTextView.setText(news.getAuthorName());
+            datePublishedTextView.setText(news.getPublishedDate().substring(0, 10));
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
