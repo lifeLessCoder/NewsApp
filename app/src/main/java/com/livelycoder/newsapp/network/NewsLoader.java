@@ -1,12 +1,15 @@
-package com.livelycoder.newsapp;
+package com.livelycoder.newsapp.network;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
+import com.livelycoder.newsapp.models.News;
+
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Loads a list of news by using an AsyncTask to perform the

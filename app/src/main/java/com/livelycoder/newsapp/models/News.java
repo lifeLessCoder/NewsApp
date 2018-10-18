@@ -1,4 +1,4 @@
-package com.livelycoder.newsapp;
+package com.livelycoder.newsapp.models;
 
 public class News {
     private String publishedDate;
@@ -6,13 +6,15 @@ public class News {
     private String title;
     private String authorName;
     private String webUrl;
+    private String thumbnail;
 
-    News(String publishedDate, String sectionName, String title, String authorName, String webUrl) {
+    public News(String publishedDate, String sectionName, String title, String authorName, String webUrl, String thumbnail) {
         this.publishedDate = publishedDate;
         this.sectionName = sectionName;
         this.title = title;
         this.authorName = authorName;
         this.webUrl = webUrl;
+        this.thumbnail = thumbnail;
     }
 
     public String getTitle() {
@@ -33,5 +35,9 @@ public class News {
 
     public String getWebUrl() {
         return webUrl;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
     }
 }

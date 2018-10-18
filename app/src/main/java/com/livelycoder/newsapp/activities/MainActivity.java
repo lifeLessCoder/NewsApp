@@ -1,4 +1,4 @@
-package com.livelycoder.newsapp;
+package com.livelycoder.newsapp.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,24 +8,30 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.livelycoder.newsapp.R;
+import com.livelycoder.newsapp.adapters.NewsAdapter;
+import com.livelycoder.newsapp.models.News;
+import com.livelycoder.newsapp.network.NewsLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>>, SwipeRefreshLayout.OnRefreshListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -41,14 +47,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().setElevation(0);
         findAllViews();
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL, false));
-        adapter = new NewsAdapter(new ArrayList<News>());
+                RecyclerView.VERTICAL, false));
+        adapter = new NewsAdapter(this, new ArrayList<News>());
         recyclerView.setAdapter(adapter);
-        recyclerView.addItemDecoration(new DividerItemDecoration(this,
-                DividerItemDecoration.VERTICAL));
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         if (cm != null) {
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -89,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // default value for this preference.
         String pageSize = sharedPreferences.getString(getString(R.string.settings_page_size_key),
                 getString(R.string.settings_page_size_default));
+        Toast.makeText(this, "page size : " + pageSize, Toast.LENGTH_SHORT).show();
         String orderBy = sharedPreferences.getString(getString(R.string.settings_order_by_key),
                 getString(R.string.settings_order_by_default));
         // parse breaks apart the URI string that's passed into its parameter
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Append query parameter and its value.
         builder.appendQueryParameter("show-tags", "contributor")
                 .appendQueryParameter("api-key", getString(R.string.api_key))
+                .appendQueryParameter("show-fields", "thumbnail")
                 .appendQueryParameter("page-size", pageSize)
                 .appendQueryParameter("order-by", orderBy);
         Log.d(LOG_TAG, "url:" + builder.toString());

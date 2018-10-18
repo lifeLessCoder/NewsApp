@@ -2,7 +2,7 @@
     <string name="app_name">NewsApp</string>
     <string name="no_internet">No Internet Connection.</string>
     <string name="no_news">No news available, please reload the app or check after some time.</string>
-    <string name="attribution">Icon by Freepik from flaticon.com</string>
+    <string name="attribution">Icons by Freepik from flaticon.com</string>
     <string name="credits">Credits</string>
     <string name="ok">OK</string>
     <string name="api_key">eec14534-f89b-4c12-b284-48ccb35064ac</string>
@@ -26,5 +26,6 @@
     <!-- Label for order-by relevance option -->
     <string name="settings_order_by_relevance_label">Relevance</string>
     <string name="settings_order_by_relevance_value" translatable="false">relevance</string>
+    <string name="news_image">News Image</string>
 
 </resources>

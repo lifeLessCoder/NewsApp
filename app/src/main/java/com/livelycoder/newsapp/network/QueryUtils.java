@@ -1,7 +1,9 @@
-package com.livelycoder.newsapp;
+package com.livelycoder.newsapp.network;
 
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.livelycoder.newsapp.models.News;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +27,9 @@ class QueryUtils {
     private static final String WEB_TITLE = "webTitle";
     private static final String WEB_URL = "webUrl";
     private static final String TAGS = "tags";
+    private static final String FIELDS = "fields";
+    private static final String THUMBNAIL = "thumbnail";
+
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
     private QueryUtils() {
@@ -141,7 +146,12 @@ class QueryUtils {
                 } else {
                     authorName = "";
                 }
-                news.add(new News(publishDate, sectionName, title, authorName, webUrl));
+                JSONObject fields = result.optJSONObject(FIELDS);
+                String thumbnail = null;
+                if (fields != null) {
+                    thumbnail = fields.getString(THUMBNAIL);
+                }
+                news.add(new News(publishDate, sectionName, title, authorName, webUrl, thumbnail));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Problem parsing the JSON results", e);
