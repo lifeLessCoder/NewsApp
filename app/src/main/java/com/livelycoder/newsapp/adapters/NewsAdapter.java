@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
@@ -95,11 +97,18 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String url = news.getWebUrl();
-                    Context context = view.getContext();
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    if (intent.resolveActivity(context.getPackageManager()) != null)
-                        context.startActivity(intent);
+                    Uri uri = Uri.parse(news.getWebUrl());
+                    try {
+                        new CustomTabsIntent.Builder()
+                                .setToolbarColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                                .setShowTitle(true)
+                                .build()
+                                .launchUrl(context, uri);
+                    } catch (Exception e) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        if (intent.resolveActivity(context.getPackageManager()) != null)
+                            context.startActivity(intent);
+                    }
                 }
             });
             if (TextUtils.isEmpty(news.getThumbnail())) {
@@ -107,7 +116,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             } else {
                 Glide.with(context).load(news.getThumbnail()).into(newsImage);
             }
-
         }
     }
 }
